@@ -1,0 +1,5 @@
+VERSION: "0.1.0",
+NAME: "Example Mod",
+DESC: "A starter Songs of Syx mod.",
+AUTHOR: "bradjshannon",
+INFO: "https://github.com/bradjshannon/syxmods-bs",

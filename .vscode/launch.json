@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Game",
+            "request": "launch",
+            "mainClass": "init.Main",
+            "classPaths": [
+                "E:\\SteamLibrary\\steamapps\\common\\Songs of Syx\\SongsOfSyx.jar",
+                "${workspaceFolder}\\target\\classes"
+            ],
+            "cwd": "E:\\SteamLibrary\\steamapps\\common\\Songs of Syx",
+            "vmArgs": "-Xmx4g",
+            "shortenCommandLine": "jarmanifest"
+        },
+        {
+            "type": "java",
+            "name": "Launch Game (Launcher)",
+            "request": "launch",
+            "mainClass": "init.MainLaunchLauncher",
+            "classPaths": [
+                "E:\\SteamLibrary\\steamapps\\common\\Songs of Syx\\SongsOfSyx.jar",
+                "${workspaceFolder}\\target\\classes"
+            ],
+            "cwd": "E:\\SteamLibrary\\steamapps\\common\\Songs of Syx",
+            "shortenCommandLine": "jarmanifest"
+        }
+    ]
+}

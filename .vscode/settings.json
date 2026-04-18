@@ -1,0 +1,10 @@
+{
+    "java.project.sourcePaths": ["src/main/java"],
+    "java.project.outputPath": "target/classes",
+    "java.project.referencedLibraries": [
+        "E:\\SteamLibrary\\steamapps\\common\\Songs of Syx\\SongsOfSyx.jar"
+    ],
+    "java.home": "C:\\dev\\jdk21",
+    "maven.executable.path": "C:\\dev\\apache-maven-3.9.14\\bin\\mvn.cmd",
+    "editor.formatOnSave": true
+}

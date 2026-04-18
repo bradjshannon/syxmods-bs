@@ -1,0 +1,19 @@
+# Compiled output
+target/
+
+# Maven local repo cache (don't commit downloaded deps)
+.m2/
+
+# VS Code Java working files
+.classpath
+.project
+.settings/
+bin/
+
+# IntelliJ (if ever used)
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

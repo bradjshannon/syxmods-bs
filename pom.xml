@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>mod.example</groupId>
+    <artifactId>example-mod</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+
+    <name>Example Mod</name>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Songs of Syx version — update when the game updates -->
+        <game.version.major>70</game.version.major>
+        <game.version.minor>33</game.version.minor>
+
+        <!-- Path to your Songs of Syx Steam installation -->
+        <game.install.dir>E:\SteamLibrary\steamapps\common\Songs of Syx</game.install.dir>
+
+        <!-- Where the built mod JAR is deployed (the game's mods folder) -->
+        <mod.name>${project.name}</mod.name>
+        <mod.deploy.dir>${env.APPDATA}\songsofsyx\mods\${mod.name}\V${game.version.major}\script</mod.deploy.dir>
+        <mod.resources.dir>${env.APPDATA}\songsofsyx\mods\${mod.name}</mod.resources.dir>
+    </properties>
+
+    <dependencies>
+        <!-- Game API — registered to local Maven repo via: mvn validate -->
+        <dependency>
+            <groupId>com.songsofsyx</groupId>
+            <artifactId>songsofsyx</artifactId>
+            <version>${game.version.major}.${game.version.minor}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.11.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Register the game JAR into local Maven repo -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>install-game-jar</id>
+                        <phase>validate</phase>
+                        <goals><goal>install-file</goal></goals>
+                        <configuration>
+                            <file>${game.install.dir}\SongsOfSyx.jar</file>
+                            <sources>${game.install.dir}\info\SongsOfSyx-sources.jar</sources>
+                            <groupId>com.songsofsyx</groupId>
+                            <artifactId>songsofsyx</artifactId>
+                            <version>${game.version.major}.${game.version.minor}</version>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Shade plugin: bundle all non-game deps into a single fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>com.songsofsyx:songsofsyx</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Deploy the built JAR and mod resources to the game's mods folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <!-- Copy mod-files (e.g. _Info.txt, V70 assets) -->
+                    <execution>
+                        <id>copy-mod-resources</id>
+                        <phase>install</phase>
+                        <goals><goal>copy-resources</goal></goals>
+                        <configuration>
+                            <outputDirectory>${mod.resources.dir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/mod-files</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <!-- Copy the shaded JAR to the game's script folder -->
+                    <execution>
+                        <id>deploy-jar</id>
+                        <phase>install</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${mod.deploy.dir}"/>
+                                <copy overwrite="true"
+                                      file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                      tofile="${mod.deploy.dir}/${mod.name}.jar"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
