@@ -1,5 +1,5 @@
 VERSION: "0.1.0",
-NAME: "Example Mod",
-DESC: "A starter Songs of Syx mod.",
+NAME: "Capital Filter",
+DESC: "Filter settlement candidates by resources, adjacency, and climate.",
 AUTHOR: "bradjshannon",
 INFO: "https://github.com/bradjshannon/syxmods-bs",

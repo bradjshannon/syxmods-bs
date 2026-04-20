@@ -127,7 +127,7 @@ Example row:
 
 - `[x] Clay   [100]`
 
-The implementing agent must determine the actual list of resources exposed by the settlement-site data in v70.
+The list of resources is discovered at runtime by iterating `RESOURCES.minables().all()`. The checkbox label for each resource uses `minable.resource.name` (the game's own localized `CharSequence`). Do not hardcode resource names.
 
 ## 5.4 Adjacency rules
 
@@ -156,11 +156,7 @@ Important:
 
 ## 5.5 Climate rules
 
-Use one checkbox for each climate value:
-
-- cold
-- temperate
-- warm
+Iterate `CLIMATES.ALL()` at runtime to produce one checkbox per climate. The checkbox label text is `climate.name` — the game's own localized `CharSequence`. Do not hardcode climate names.
 
 Semantics:
 
@@ -169,11 +165,11 @@ Semantics:
 - if no climate boxes are checked:
   - climate is ignored
 
-Examples:
+Example (labels will reflect actual game localization, e.g. the three climates may appear as "Cold", "Temperate", "Hot"):
 
 - `[x] Cold`
 - `[x] Temperate`
-- `[ ] Warm`
+- `[ ] Hot`
 
 ## 5.6 Rule activation rule
 
@@ -280,7 +276,7 @@ CandidateSite
 - adjacentOcean : boolean
 - adjacentRiver : boolean
 - adjacentMountain : boolean
-- climate : COLD | TEMPERATE | WARM
+- climate : CLIMATE  // game object reference; identity via CLIMATES.ALL() index
 ```
 
 A conceptual container:
@@ -466,9 +462,7 @@ FilterState
 - requireOcean: boolean
 - requireRiver: boolean
 - requireMountain: boolean
-- allowCold: boolean
-- allowTemperate: boolean
-- allowWarm: boolean
+- allowedClimates: boolean[]  // length = CLIMATES.ALL().size(); indexed by climate.index()
 ```
 
 ```text
@@ -485,9 +479,7 @@ hasAnyRuleEnabled =
     OR requireOcean
     OR requireRiver
     OR requireMountain
-    OR allowCold
-    OR allowTemperate
-    OR allowWarm
+    OR any(allowedClimates)
 ```
 
 Note:
@@ -514,15 +506,10 @@ function passes(candidate, filters):
     if filters.requireMountain and not candidate.adjacentMountain:
         return false
 
-    climateFilterActive =
-        filters.allowCold or filters.allowTemperate or filters.allowWarm
+    climateFilterActive = any(filters.allowedClimates)
 
     if climateFilterActive:
-        if candidate.climate == COLD and not filters.allowCold:
-            return false
-        if candidate.climate == TEMPERATE and not filters.allowTemperate:
-            return false
-        if candidate.climate == WARM and not filters.allowWarm:
+        if not filters.allowedClimates[candidate.climate.index()]:
             return false
 
     return true
