@@ -6,9 +6,7 @@ import init.resources.RESOURCES;
 import init.type.CLIMATES;
 import script.SCRIPT;
 import snake2d.LOG;
-import snake2d.MButt;
 import snake2d.Renderer;
-import snake2d.util.datatypes.COORDINATE;
 import snake2d.util.file.FileGetter;
 import snake2d.util.file.FilePutter;
 import view.main.VIEW;
@@ -36,12 +34,10 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void update(double ds) {
-        if (!(VIEW.current() instanceof WorldViewGenerator))
-            return;
-        if (WORLD.GEN().playerX >= 0)
-            return; // capital already placed — hide
-        if (initFailed)
-            return;
+        if (!(VIEW.current() instanceof WorldViewGenerator)) return;
+        if (!WORLD.GEN().hasGeneratedTerrain)               return; // too early (species select etc.)
+        if (WORLD.GEN().playerX >= 0)                       return; // capital already placed
+        if (initFailed)                                     return;
 
         if (!initialized) {
             initComponents();
@@ -56,34 +52,17 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void render(Renderer r, float ds) {
-        if (!(VIEW.current() instanceof WorldViewGenerator))
-            return;
-        if (!initialized || initFailed)
-            return;
-        if (WORLD.GEN().playerX >= 0)
-            return;
+        if (!(VIEW.current() instanceof WorldViewGenerator)) return;
+        if (!initialized || initFailed)                     return;
+        if (!WORLD.GEN().hasGeneratedTerrain)               return;
+        if (WORLD.GEN().playerX >= 0)                       return;
 
         try {
-            // Re-add markers every frame (EThings clears each frame)
+            // Re-add overlay markers every frame (EThings clears each frame).
+            // FilterPanel renders itself via its Interrupter.render() in current.uiManager.
             markers.render(cache.getSites(), filters);
-            // Draw the filter panel UI
-            panel.render(r, cache, filters);
         } catch (Exception e) {
             LOG.err("[CapitalFilter] render failed: " + e);
-        }
-    }
-
-    @Override
-    public void hover(COORDINATE mCoo, boolean mouseHasMoved) {
-        if (panel != null) {
-            panel.onMouseHover(mCoo.x(), mCoo.y());
-        }
-    }
-
-    @Override
-    public void mouseClick(MButt button) {
-        if (panel != null && button == MButt.LEFT) {
-            panel.onMouseClick(VIEW.mouse().x(), VIEW.mouse().y(), filters);
         }
     }
 
@@ -96,8 +75,12 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void load(FileGetter file) throws IOException {
-        // Nothing to load — filter state starts fresh each session.
-        // Reset initialized flag so components are re-created from fresh game data.
+        // Filter state starts fresh each session.
+        // Hide and discard the old panel interrupter before re-initializing so we don't
+        // accumulate stale Interrupter instances in uiManager after a game reload.
+        if (panel != null) {
+            panel.hide();
+        }
         initialized = false;
     }
 
@@ -108,15 +91,21 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
     private void initComponents() {
         try {
             int resourceCount = RESOURCES.minables().all().size();
-            int climateCount = CLIMATES.ALL().size();
+            int climateCount  = CLIMATES.ALL().size();
             LOG.ln("[CapitalFilter] init — resources=" + resourceCount + " climates=" + climateCount);
 
-            cache = new CandidateCache();
+            cache   = new CandidateCache();
             cache.init();
             cache.rebuildIfNeeded();
 
             filters = new FilterState(resourceCount, climateCount);
-            panel = new FilterPanel();
+
+            // Register the panel as a pinned Interrupter in the current view's uiManager.
+            // This makes hover/click properly consumed (prevents capital placement on panel
+            // clicks) and ensures the panel renders in the right layer order.
+            panel = new FilterPanel(cache, filters);
+            ((WorldViewGenerator) VIEW.current()).uiManager.add(panel);
+
             markers = new MarkerRenderer();
             LOG.ln("[CapitalFilter] init complete — sites=" + cache.getSites().size());
         } catch (Exception e) {
