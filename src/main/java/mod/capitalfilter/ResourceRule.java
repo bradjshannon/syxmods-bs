@@ -9,5 +9,5 @@ public final class ResourceRule {
      * Minimum required score as an integer percentage (0–100).
      * The site's {@code resourceScore * 100} must be >= this value.
      */
-    public int minPercent = 25;
+    public int minPercent = 100;
 }

@@ -34,10 +34,14 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void update(double ds) {
-        if (!(VIEW.current() instanceof WorldViewGenerator)) return;
-        if (!WORLD.GEN().hasGeneratedTerrain)               return; // too early (species select etc.)
-        if (WORLD.GEN().playerX >= 0)                       return; // capital already placed
-        if (initFailed)                                     return;
+        if (!(VIEW.current() instanceof WorldViewGenerator))
+            return;
+        if (!WORLD.GEN().hasGeneratedTerrain)
+            return; // too early (species select etc.)
+        if (WORLD.GEN().playerX >= 0)
+            return; // capital already placed
+        if (initFailed)
+            return;
 
         if (!initialized) {
             initComponents();
@@ -52,10 +56,14 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void render(Renderer r, float ds) {
-        if (!(VIEW.current() instanceof WorldViewGenerator)) return;
-        if (!initialized || initFailed)                     return;
-        if (!WORLD.GEN().hasGeneratedTerrain)               return;
-        if (WORLD.GEN().playerX >= 0)                       return;
+        if (!(VIEW.current() instanceof WorldViewGenerator))
+            return;
+        if (!initialized || initFailed)
+            return;
+        if (!WORLD.GEN().hasGeneratedTerrain)
+            return;
+        if (WORLD.GEN().playerX >= 0)
+            return;
 
         try {
             // Re-add overlay markers every frame (EThings clears each frame).
@@ -79,7 +87,7 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
         // Hide and discard the old panel interrupter before re-initializing so we don't
         // accumulate stale Interrupter instances in uiManager after a game reload.
         if (panel != null) {
-            panel.hide();
+            panel.dispose();
         }
         initialized = false;
     }
@@ -91,14 +99,15 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
     private void initComponents() {
         try {
             int resourceCount = RESOURCES.minables().all().size();
-            int climateCount  = CLIMATES.ALL().size();
+            int climateCount = CLIMATES.ALL().size();
             LOG.ln("[CapitalFilter] init — resources=" + resourceCount + " climates=" + climateCount);
 
-            cache   = new CandidateCache();
+            cache = new CandidateCache();
             cache.init();
             cache.rebuildIfNeeded();
 
             filters = new FilterState(resourceCount, climateCount);
+            FilterPrefs.load(filters);
 
             // Register the panel as a pinned Interrupter in the current view's uiManager.
             // This makes hover/click properly consumed (prevents capital placement on panel
