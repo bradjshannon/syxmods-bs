@@ -138,7 +138,10 @@ public final class FilterPanel extends Interrupter {
         return true;
     }
 
-    /** Called by CapitalFilterInstance.load() to deactivate this panel before re-init. */
+    /**
+     * Called by CapitalFilterInstance.load() to deactivate this panel before
+     * re-init.
+     */
     public void dispose() {
         hide();
     }
@@ -306,7 +309,8 @@ public final class FilterPanel extends Interrupter {
             advanceToNextResult();
             return;
         }
-        // Resource threshold +/− (before checkbox rects because checkbox rects are expanded to full row)
+        // Resource threshold +/− (before checkbox rects because checkbox rects are
+        // expanded to full row)
         for (int i = 0; i < resourcePlusRects.size(); i++) {
             int[] plus = resourcePlusRects.get(i);
             int[] minus = resourceMinusRects.get(i);
