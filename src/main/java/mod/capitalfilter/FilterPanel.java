@@ -384,6 +384,11 @@ public final class FilterPanel extends Interrupter {
     }
 
     private void advanceToNextResult() {
+        stepResult(+1);
+    }
+
+    /** Step through passing candidates. direction = +1 (forward) or -1 (back). */
+    public void stepResult(int direction) {
         List<CandidateSite> passing = new ArrayList<>();
         for (CandidateSite s : cache.getSites()) {
             if (FilterEvaluator.passes(s, filters))
@@ -391,7 +396,7 @@ public final class FilterPanel extends Interrupter {
         }
         if (passing.isEmpty())
             return;
-        jumpIndex = (jumpIndex + 1) % passing.size();
+        jumpIndex = (jumpIndex + direction % passing.size() + passing.size()) % passing.size();
         centerOnSite(passing.get(jumpIndex));
     }
 

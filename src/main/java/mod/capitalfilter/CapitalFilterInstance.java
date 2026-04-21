@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import init.resources.RESOURCES;
 import init.type.CLIMATES;
+import org.lwjgl.glfw.GLFW;
 import script.SCRIPT;
+import snake2d.KEYCODES;
 import snake2d.LOG;
 import snake2d.Renderer;
 import snake2d.util.file.FileGetter;
@@ -24,6 +26,9 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
     private boolean initialized = false;
     /** True if initComponents() threw — prevents NPEs in subsequent calls. */
     private boolean initFailed = false;
+    // Debounce state for arrow-key shortcuts
+    private boolean rightWasDown = false;
+    private boolean leftWasDown = false;
 
     public CapitalFilterInstance() {
     }
@@ -51,6 +56,25 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
             cache.rebuildIfNeeded();
         } catch (Exception e) {
             LOG.err("[CapitalFilter] rebuildIfNeeded failed: " + e);
+        }
+        pollArrowKeys();
+    }
+
+    private void pollArrowKeys() {
+        if (panel == null)
+            return;
+        try {
+            long win = GLFW.glfwGetCurrentContext();
+            boolean rightDown = GLFW.glfwGetKey(win, KEYCODES.KEY_RIGHT) == GLFW.GLFW_PRESS;
+            boolean leftDown  = GLFW.glfwGetKey(win, KEYCODES.KEY_LEFT)  == GLFW.GLFW_PRESS;
+            if (rightDown && !rightWasDown)
+                panel.stepResult(+1);
+            if (leftDown && !leftWasDown)
+                panel.stepResult(-1);
+            rightWasDown = rightDown;
+            leftWasDown  = leftDown;
+        } catch (Exception e) {
+            LOG.err("[CapitalFilter] pollArrowKeys failed: " + e);
         }
     }
 
