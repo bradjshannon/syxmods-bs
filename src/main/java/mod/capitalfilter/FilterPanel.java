@@ -150,9 +150,13 @@ public final class FilterPanel extends Interrupter {
     // Rendering helpers
     // -----------------------------------------------------------------------
 
+    // Minimap occupies the top-right corner: ~36px button bar + 262px map body.
+    // Position the filter panel just below it with a small gap.
+    private static final int MINIMAP_BOTTOM = 36 + 262 + 4;
+
     private void computePosition() {
-        panelX = C.WIDTH() / 2 + 130 + 8;
-        panelY = 64;
+        panelX = C.WIDTH() - PANEL_W - 4;
+        panelY = MINIMAP_BOTTOM;
         int rows = 1 // title
                 + filters.resourceRules.length // resource rows
                 + 1 // "Adjacency" header
@@ -187,7 +191,7 @@ public final class FilterPanel extends Interrupter {
 
             int bx1 = panelX + MARGIN;
             int bx2 = bx1 + BOX_SIZE;
-            int by1 = curY + (ROW_H - BOX_SIZE) / 2;
+            int by1 = curY + (ROW_H - BOX_SIZE) / 2 - 2;
             int by2 = by1 + BOX_SIZE;
 
             renderCheckbox(r, bx1, by1, rule.enabled);
@@ -267,7 +271,7 @@ public final class FilterPanel extends Interrupter {
     private int renderAdjRow(SPRITE_RENDERER r, int curY, String label,
             boolean checked, int[] rectOut) {
         int bx1 = panelX + MARGIN;
-        int by1 = curY + (ROW_H - BOX_SIZE) / 2;
+        int by1 = curY + (ROW_H - BOX_SIZE) / 2 - 2;
         renderCheckbox(r, bx1, by1, checked);
         rectOut[0] = bx1;
         rectOut[1] = curY;
@@ -373,9 +377,9 @@ public final class FilterPanel extends Interrupter {
         jumpButtonRect[1] = curY;
         jumpButtonRect[2] = bx2;
         jumpButtonRect[3] = curY + ROW_H;
-        COLOR.WHITE65.bind();
-        UI.PANEL().thin.render(r, bx1, bx2, curY, curY + ROW_H, 0, 0);
-        COLOR.unbind();
+        // Solid border + dark interior, same pattern as checkboxes
+        COLOR.WHITE150.render(r, bx1, bx2, curY, curY + ROW_H);
+        COLOR.WHITE20.render(r, bx1 + 1, bx2 - 1, curY + 1, curY + ROW_H - 1);
         renderLabel(r, "Next result", bx1 + MARGIN, curY, COLOR.WHITE150);
     }
 
