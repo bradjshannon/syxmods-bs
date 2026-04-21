@@ -281,13 +281,14 @@ public final class FilterPanel extends Interrupter {
     private void renderCheckbox(SPRITE_RENDERER r, int x1, int y1, boolean checked) {
         int x2 = x1 + BOX_SIZE;
         int y2 = y1 + BOX_SIZE;
-        COLOR.WHITE65.bind();
-        UI.PANEL().thin.render(r, x1, x2, y1, y2, 0, 0);
+        // Solid white-grey border so the box is always visible against the panel
+        COLOR.WHITE150.render(r, x1, x2, y1, y2);
+        // Dark interior (unchecked background)
+        COLOR.WHITE20.render(r, x1 + 2, x2 - 2, y1 + 2, y2 - 2);
         if (checked) {
-            COLOR.GREEN200.bind();
-            UI.PANEL().thin.render(r, x1 + 2, x2 - 2, y1 + 2, y2 - 2, 0, 0);
+            // Green fill inside when active
+            COLOR.GREEN200.render(r, x1 + 3, x2 - 3, y1 + 3, y2 - 3);
         }
-        COLOR.unbind();
     }
 
     private void renderLabel(SPRITE_RENDERER r, CharSequence text,
