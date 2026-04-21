@@ -138,12 +138,16 @@ public final class FilterPanel extends Interrupter {
         return true;
     }
 
-    /**
-     * Called by CapitalFilterInstance.load() to deactivate this panel before
+    /** Called by CapitalFilterInstance.load() to deactivate this panel before
      * re-init.
      */
     public void dispose() {
         hide();
+    }
+
+    /** Called when the player returns to site selection without a full reload. */
+    public void resetJumpIndex() {
+        jumpIndex = -1;
     }
 
     // -----------------------------------------------------------------------

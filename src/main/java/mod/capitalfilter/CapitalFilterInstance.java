@@ -29,6 +29,8 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
     // Debounce state for arrow-key shortcuts
     private boolean rightWasDown = false;
     private boolean leftWasDown = false;
+    // Tracks whether the last tick was active, to detect re-entry into site selection
+    private boolean wasActive = false;
 
     public CapitalFilterInstance() {
     }
@@ -39,14 +41,26 @@ public final class CapitalFilterInstance implements SCRIPT.SCRIPT_INSTANCE {
 
     @Override
     public void update(double ds) {
-        if (!(VIEW.current() instanceof WorldViewGenerator))
+        boolean active = (VIEW.current() instanceof WorldViewGenerator)
+                && WORLD.GEN().hasGeneratedTerrain
+                && WORLD.GEN().playerX < 0
+                && !initFailed;
+
+        if (!active) {
+            // Clear debounce so stale key state doesn't carry into the next
+            // active session (e.g. if the user returns to site selection).
+            rightWasDown = false;
+            leftWasDown = false;
+            wasActive = false;
             return;
-        if (!WORLD.GEN().hasGeneratedTerrain)
-            return; // too early (species select etc.)
-        if (WORLD.GEN().playerX >= 0)
-            return; // capital already placed
-        if (initFailed)
-            return;
+        }
+
+        // Detect re-entry (same session, playerX reset back to < 0 without a load()).
+        // Reset the result-cycle index so navigation starts fresh.
+        if (!wasActive && initialized && panel != null) {
+            panel.resetJumpIndex();
+        }
+        wasActive = true;
 
         if (!initialized) {
             initComponents();
